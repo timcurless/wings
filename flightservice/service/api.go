@@ -13,6 +13,8 @@ import (
 
 var trips = inmem.NewTripRepository()
 
+var isHealthy = true
+
 func NewTrip(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		User        string `json:"user"`
@@ -39,19 +41,19 @@ func NewTrip(w http.ResponseWriter, r *http.Request) {
 
 	data, _ := json.Marshal(trip)
 
-	sendJSONResponse(w, 201, data)
+	sendJSONResponse(w, http.StatusCreated, data)
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
 	var tripId = mux.Vars(r)["tripId"]
 	trip, err := trips.Find(tripId)
 	if err != nil {
-		w.WriteHeader(404)
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(err.Error()))
 	}
 	data, _ := json.Marshal(trip)
 
-	sendJSONResponse(w, 200, data)
+	sendJSONResponse(w, http.StatusOK, data)
 }
 
 func GetTrips(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +61,7 @@ func GetTrips(w http.ResponseWriter, r *http.Request) {
 
 	data, _ := json.Marshal(allTrips)
 
-	sendJSONResponse(w, 200, data)
+	sendJSONResponse(w, http.StatusOK, data)
 }
 
 func sendJSONResponse(w http.ResponseWriter, status int, data []byte) {
@@ -67,4 +69,18 @@ func sendJSONResponse(w http.ResponseWriter, status int, data []byte) {
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 	w.WriteHeader(status)
 	w.Write(data)
+}
+
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+	if isHealthy {
+		data, _ := json.Marshal(healthCheckRes{Status: "UP"})
+		sendJSONResponse(w, http.StatusOK, data)
+	} else {
+		data, _ := json.Marshal(healthCheckRes{Status: "DOWN"})
+		sendJSONResponse(w, http.StatusServiceUnavailable, data)
+	}
+}
+
+type healthCheckRes struct {
+	Status string `json:"status"`
 }

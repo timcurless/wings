@@ -33,4 +33,10 @@ var routes = Routes{
 		"GET",
 		GetTrip,
 	},
+	Route{
+		"HealthCheck",
+		"/health",
+		"GET",
+		HealthCheck,
+	},
 }

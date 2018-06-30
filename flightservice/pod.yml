@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: flightservice
+  labels:
+    type: api
+    service: flightservice
+spec:
+  containers:
+  - name: api
+    image: timcurless/flightservice
+    imagePullPolicy: Never
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 8080
